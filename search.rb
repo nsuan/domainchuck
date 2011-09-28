@@ -2,26 +2,37 @@ class Search
   def extract_words(phrase)
     node = @word_tree
     words = []
+    word = ''
     phrase.each_char.with_index do |c, i|
       node = node[c.to_sym]
-      break if node.nil?
-      words << phrase[0..i] if node[:word]
+      word = word + c
+      if node.nil?
+        p = phrase[word.size-1..-1]
+        if p.size > 2
+          w = extract_words(phrase[word.size-1..-1])
+          words = words | w
+          puts words
+        end
+        break
+      elsif node[:word]
+        words << phrase[0..i] 
+      end
     end
     words
   end
-
+  
   def locate_words(phrase, words = [], word_list = [])
     if phrase.empty?
       word_list << words
     else
         extract_words(phrase).each do |word|
           remainder = phrase[word.size..-1]
-          puts remainder
           locate_words(remainder, words + [word], word_list)
         end
     end
     word_list
   end
+  
   def initialize(word_Tree)
     @word_tree = word_Tree.word_tree
   end
